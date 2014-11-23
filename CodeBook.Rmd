@@ -1,0 +1,93 @@
+---
+title: "CodeBook For courseproject of Getting and Cleaning Data"
+Purpose: To describe the variables, data, and the logic in transforming source data to tidy data
+Author: Vijji Sekuboyina
+---
+
+###Source Data:
+Data for the project is taken from:
+https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip 
+
+###Description of Data:
+The source data collected from the accelerometers from the Samsung Galaxy S smartphone. A full description is available at the site where the data was obtained:
+
+http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones 
+
+### Data set Information:
+
+* features.txt - Contains the labels for the 564-features 
+* activity_labels.txt - Contains the 6 activities that were monitored to collect the data [1-WALKING, 2-WALKING_UPSTAIRS, 3-WALKING_DOWNSTAIRS, 4-SITTING, 5-STANDING, 6-LAYING]
+* train/X_train.txt - Data for 564-features for which the labels are in features.txt
+* train/subject_train.txt - Each row shows the subject that collected the data in corresponding row of X_train.txt
+* train/y_train.txt - Each row shows the activity that was performed which resulted in the data in the corresponding row of X_train.txt
+* test/X_test.txt - Data for 564-features for which the labels are in features.txt
+* test/subject_test.txt - Each row shows the subject that collected the data in corresponding row of X_test.txt
+* test/y_test.txt - Each row shows the activity that was performed which resulted in the data in the corresponding row of X_test.txt
+
+### Varaibles used:
+
+* FeaturesTbl - Table that contained information from features.txt
+* SubTrainTbl - Table that stored information of the subject id for training data
+* xTrainTbl - Table with data for 564-variables obtained for training
+* yTrainTbl - Table with activity information for training data
+* SubTestTbl - Table that stored information of the subject id for testing data
+* xTestTbl - Table with data for 564-variables obtained for testing
+* yTestTbl - Table with activity information for testing data
+
+## Steps performed for Cleaning data
+S1: Gather all Training information: 
+    Merge the three tables - yTrainTbl, SubTrainTbl and xTrainTbl [Using cbind]
+    
+    *TrainingTbl <- cbind (yTrainTbl, SubTrainTbl, xTrainTbl)*
+    
+S2: Gather all Testing information:
+    Merge the three tables - yTestTbl, SubTestTbl and xTestTbl [Using cbind]
+    
+    *TestTbl <- cbind (yTestTbl, SubTestTbl, xTestTbl)*
+    
+S3: Merge both Training information and testing information into one big table
+
+    *AllDataTbl <- rbind (TrainingTbl, TestTbl)*
+    
+S4: Extract information only that pertains to mean and standard deviation.
+    i.e., identify the columns that have mean and std in their names and extract them
+    Extract the subject and activyt information also
+    
+    *DataMeanStd <- AllDataTbl[, grepl("Subject|ActID|mean|std", LabelNames)]*
+    
+S5: Give a descriptive Activity name in the resulting table
+    Read the activity information from the activity data and add a new column
+    for activity in the above table
+    
+    *DataMeanStd$Activity <- ActivityTbl [DataMeanStd$ActID, 2]*
+    
+S6: Appropriately label the column names to have descriptive names:
+    For this, replace mean() with Mean, std() with Std Deviation, etc
+```{r}
+#   DataLabels <- colnames (DataMeanStd)
+#   for (i in 1:length(DataLabels)) {
+#      DataLabels[i] <- gsub("-mean\\()", " Mean", DataLabels[i])
+#      DataLabels[i] <- gsub("-std\\()", " Std Deviation", DataLabels[i]) 
+#      DataLabels[i] <- gsub("-meanFreq\\()", " Mean Frequency", DataLabels[i])
+#      DataLabels[i] <- gsub("^t", "Time: ", DataLabels[i])
+#      DataLabels[i] <- gsub("^f", "Freq: ", DataLabels[i])
+#      DataLabels[i] <- gsub("Acc", " Accelaration", DataLabels[i])
+#      DataLabels[i] <- gsub("BodyBody", "Body", DataLabels[i])
+#      DataLabels[i] <- gsub("Mag", " Magnitude", DataLabels[i])
+#      DataLabels[i] <- gsub("Gyro", " Gyro", DataLabels[i])
+#      DataLabels[i] <- gsub("Jerk", " Jerk", DataLabels[i])
+#   }
+#   colnames(DataMeanStd) <- DataLabels
+```
+
+S7: From the data set in step 6, creates a second, independent tidy data
+    set with the average of each variable for each activity and each subject.
+    For this we use ddply and numcolwise function
+
+    *TidyDataWithAvgs <- ddply(DataMeanStd, c("Subject", "Activity"), 
+                              numcolwise(mean))
+     write.table (TidyDataWithAvgs, file="tidydatawithaverages.txt")*
+     
+```{r}
+
+```
