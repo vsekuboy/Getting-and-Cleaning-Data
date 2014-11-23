@@ -111,4 +111,4 @@ colnames(DataMeanStd) <- DataLabels
 require(plyr)
 
 TidyDataWithAvgs <- ddply(DataMeanStd, c("Subject", "Activity"), numcolwise(mean))
-write.table (TidyDataWithAvgs, file="tidydatawithaverages.txt")
+write.table (TidyDataWithAvgs, file="tidydatawithaverages.txt", row.name=FALSE)
